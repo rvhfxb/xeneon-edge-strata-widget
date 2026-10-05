@@ -8,15 +8,15 @@ Strata v0.1.39 の公式 Web UI「Monitor」を XENEON EDGE（2560×720）に合
 
 ## スクリーンショット
 
-2560×720のブラウザープレビュー（v0.1.5、実データ）。XENEON EDGE本体の写真ではありません。アイドル時の速度は直近リクエストの値で、グラフは公式と同じ60秒の履歴です。
+2560×720のブラウザープレビュー（v0.1.5、実データ）。モデル表示名は公開用に、量子化を含むダウンロード済みGGUFのファイル名（先頭シャード）へ置き換えています。XENEON EDGE本体の写真ではありません。アイドル時の速度は直近リクエストの値で、グラフは公式と同じ60秒の履歴です。
 
 **ダーク**
 
-![Strata Edgeのダークテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-dark.png)
+![Strata Edgeのダークテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-dark-preview.png)
 
 **ライト**
 
-![Strata Edgeのライトテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-light.png)
+![Strata Edgeのライトテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-light-preview.png)
 
 ## 必要なもの
 

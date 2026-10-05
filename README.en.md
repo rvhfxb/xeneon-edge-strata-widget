@@ -8,15 +8,15 @@ A community iCUE widget that adapts the official Strata v0.1.39 Web UI **Monitor
 
 ## Screenshots
 
-Browser previews at 2560×720, captured with v0.1.5 and real monitoring data. These are not photographs of the XENEON EDGE display. While idle, speed numbers show the last request; graphs show the official 60-second history.
+Browser previews at 2560×720, captured with v0.1.5 and real monitoring data. For publication, the model display name is replaced with the downloaded GGUF filename (first shard), including its quantization. These are not photographs of the XENEON EDGE display. While idle, speed numbers show the last request; graphs show the official 60-second history.
 
 **Dark**
 
-![Strata Edge dark theme showing model state, speed, GPU and memory metrics, context fill, and recent requests](docs/images/strata-edge-dark.png)
+![Strata Edge dark theme showing model state, speed, GPU and memory metrics, context fill, and recent requests](docs/images/strata-edge-dark-preview.png)
 
 **Light**
 
-![Strata Edge light theme showing model state, speed, GPU and memory metrics, context fill, and recent requests](docs/images/strata-edge-light.png)
+![Strata Edge light theme showing model state, speed, GPU and memory metrics, context fill, and recent requests](docs/images/strata-edge-light-preview.png)
 
 ## Requirements
 

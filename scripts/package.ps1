@@ -37,7 +37,7 @@ foreach ($edgeFile in @('README.md','README.en.md','CHANGELOG.md','LICENSE','THI
 }
 # Keep README images available offline without including unrelated documentation assets.
 New-Item -ItemType Directory -Force -Path (Join-Path $edgeStage 'docs\images') | Out-Null
-foreach ($edgeImage in @('strata-edge-dark.png','strata-edge-light.png')) {
+foreach ($edgeImage in @('strata-edge-dark-preview.png','strata-edge-light-preview.png')) {
     Copy-Item -LiteralPath (Join-Path $edgeRoot ('docs\images\' + $edgeImage)) -Destination (Join-Path $edgeStage 'docs\images')
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'server.cjs') -Destination (Join-Path $edgeStage 'scripts')

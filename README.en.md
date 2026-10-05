@@ -8,7 +8,7 @@ A community iCUE widget that adapts the official Strata v0.1.39 Web UI **Monitor
 
 ## Screenshots
 
-Browser previews at 2560×720, captured with v0.1.5 and real monitoring data. For publication, the model display name is replaced with the downloaded GGUF filename (first shard), including its quantization. These are not photographs of the XENEON EDGE display. While idle, speed numbers show the last request; graphs show the official 60-second history.
+Browser previews at 2560×720, captured with v0.1.5 and real monitoring data. For publication, the model display name is replaced with `Qwen3.8-Flash-Next-UD-Q4_K_XL`, the downloaded GGUF filename with the shard number and extension omitted. These are not photographs of the XENEON EDGE display. While idle, speed numbers show the last request; graphs show the official 60-second history.
 
 **Dark**
 

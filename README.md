@@ -1,8 +1,22 @@
 # Strata Edge 0.1.5
 
+[日本語](README.md) | [English](README.en.md)
+
 Strata v0.1.39 の公式 Web UI「Monitor」を XENEON EDGE（2560×720）に合わせたコミュニティ製 iCUE ウィジェット。作者: rvhfxb。Strata / CORSAIR の公式製品ではありません。
 
 [配布ファイルをダウンロード](https://github.com/rvhfxb/xeneon-edge-strata-widget/releases/tag/v0.1.5)。初回はヘルパー同梱 ZIP、既存ヘルパーがある場合は `.icuewidget` を使用してください。GitHub の「Source code」ZIP は開発用ソースです。
+
+## スクリーンショット
+
+2560×720のブラウザープレビュー（v0.1.5、実データ）。XENEON EDGE本体の写真ではありません。アイドル時の速度は直近リクエストの値で、グラフは公式と同じ60秒の履歴です。
+
+**ダーク**
+
+![Strata Edgeのダークテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-dark.png)
+
+**ライト**
+
+![Strata Edgeのライトテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-light.png)
 
 ## 必要なもの
 

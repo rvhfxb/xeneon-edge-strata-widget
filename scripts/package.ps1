@@ -30,10 +30,15 @@ $edgeStage = Join-Path $edgeStageParent "Strata-Edge-$edgeVersion"
 New-Item -ItemType Directory -Force -Path (Join-Path $edgeStage 'scripts') | Out-Null
 Copy-Item -LiteralPath (Join-Path $edgeRoot 'widget') -Destination $edgeStage -Recurse
 Copy-Item -LiteralPath $edgeWidget -Destination $edgeStage
-foreach ($edgeFile in @('README.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICES.md','helper.config.json','Helper-Common.ps1',
+foreach ($edgeFile in @('README.md','README.en.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICES.md','helper.config.json','Helper-Common.ps1',
     'Install-Helper.ps1','Start-Helper.ps1','Stop-Helper.ps1','Uninstall-Helper.ps1',
     'Install-Helper.cmd','Start-Helper.cmd','Stop-Helper.cmd','Uninstall-Helper.cmd')) {
     Copy-Item -LiteralPath (Join-Path $edgeRoot $edgeFile) -Destination $edgeStage
+}
+# Keep README images available offline without including unrelated documentation assets.
+New-Item -ItemType Directory -Force -Path (Join-Path $edgeStage 'docs\images') | Out-Null
+foreach ($edgeImage in @('strata-edge-dark.png','strata-edge-light.png')) {
+    Copy-Item -LiteralPath (Join-Path $edgeRoot ('docs\images\' + $edgeImage)) -Destination (Join-Path $edgeStage 'docs\images')
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'server.cjs') -Destination (Join-Path $edgeStage 'scripts')
 $edgeChecksums = Get-ChildItem -LiteralPath $edgeStage -File -Recurse | Sort-Object FullName | ForEach-Object {

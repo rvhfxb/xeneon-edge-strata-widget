@@ -44,12 +44,22 @@ async function main() {
     const {targetId}=await send('Target.createTarget',{url:'about:blank'},null);
     ({sessionId:session}=await send('Target.attachToTarget',{targetId,flatten:true},null));
     await send('Page.enable'); await send('Runtime.enable');
-    const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text);return r.result.value;};
+    const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);return r.result.value;};
+    const waitReady=async () => {
+      const deadline=Date.now()+15000;
+      while (Date.now()<deadline) {
+        try {
+          if (await evaluate('document.readyState === "complete" && !!document.body.dataset.check && !!document.getElementById("pill-text") && !["Connecting…"].includes(document.getElementById("pill-text").textContent)')) return;
+        } catch (_) { /* Navigation can replace the execution context. */ }
+        await delay(200);
+      }
+      throw new Error('Widget startup timed out: '+JSON.stringify(await evaluate('({url:location.href,ready:document.readyState,body:document.body?.textContent?.slice(0,300)})')));
+    };
     await send('Page.addScriptToEvaluateOnNewDocument',{source:fs.readFileSync(path.join(__dirname,'layout-check.js'),'utf8')});
     await send('Page.addScriptToEvaluateOnNewDocument',{source:live ? 'window.widgetTheme="dark";' : 'window.widgetTheme="dark";window.__snapshot='+JSON.stringify(fixture)+';window.__fail=false;window.__stale=false;window.fetch=async()=>{if(window.__fail)throw Error("offline");return {ok:true,json:async()=>({...window.__snapshot,timestamp:Date.now()-(window.__stale?11000:0)})}};'});
     const page = pathToFileURL(path.join(root,'widget/index.html')).href;
     await send('Emulation.setDeviceMetricsOverride',{width:1280,height:360,deviceScaleFactor:1,mobile:false});
-    await send('Page.navigate',{url:page}); await delay(700);
+    await send('Page.navigate',{url:page}); await waitReady();
     const text=async id=>evaluate(`document.getElementById(${JSON.stringify(id)}).textContent`);
     if (!live) {
     assert.equal(await text('pill-text'),'Idle');
@@ -59,7 +69,7 @@ async function main() {
     report.checks.push({name:'official idle Prefill numeric/graph behavior',prefill:await text('mv-prefill')});
     await evaluate('document.getElementById("theme-btn").click();window.icueEvents.onDataUpdated()');
     assert.equal(await evaluate('document.documentElement.dataset.theme'),'light');
-    await send('Page.reload'); await delay(600);
+    await send('Page.reload'); await waitReady();
     assert.equal(await evaluate('document.documentElement.dataset.theme'),'light');
     await evaluate('window.widgetTheme="light";window.icueEvents.onDataUpdated();window.widgetTheme="dark";window.icueEvents.onDataUpdated()');
     assert.equal(await evaluate('document.documentElement.dataset.theme'),'dark');

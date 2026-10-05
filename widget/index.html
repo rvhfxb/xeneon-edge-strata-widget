@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>'Strata Edge'</title>
+<link rel="icon" href="resources/icon.svg" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<link rel="stylesheet" href="widget.css" />
+<meta name="x-icue-property" content="widgetTheme" data-label="'Theme'" data-type="combobox" data-default="'dark'" data-values="[{'key':'dark','value':'Dark'},{'key':'light','value':'Light'}]" />
+<script type="application/json" id="x-icue-groups">
+[
+  {
+    "title": "'Theme'",
+    "properties": [
+      "widgetTheme"
+    ]
+  }
+]
+</script>
+</head>
+<body>
+<!-- icons: Strata serve/web/sprite.svg (MIT), inlined so they load from file:// -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-activity" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M2 12C2 7.286 2 4.929 3.464 3.464C4.929 2 7.286 2 12 2C16.714 2 19.071 2 20.536 3.464C22 4.929 22 7.286 22 12C22 16.714 22 19.071 20.536 20.536C19.071 22 16.714 22 12 22C7.286 22 4.929 22 3.464 20.536C2 19.071 2 16.714 2 12Z" fill="currentColor"></path><path d="M2 12C2 7.286 2 4.929 3.464 3.464C4.929 2 7.286 2 12 2C16.714 2 19.071 2 20.536 3.464C22 4.929 22 7.286 22 12C22 16.714 22 19.071 20.536 20.536C19.071 22 16.714 22 12 22C7.286 22 4.929 22 3.464 20.536C2 19.071 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 12.5H8.5L10.5 8L13.5 16L15.5 11.5H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M2 15C2 9.477 6.477 5 12 5C17.523 5 22 9.477 22 15C22 16.5 21.7 17.8 21.1 19H2.9C2.3 17.8 2 16.5 2 15Z" fill="currentColor"></path><path d="M2 15C2 9.477 6.477 5 12 5C17.523 5 22 9.477 22 15C22 16.5 21.7 17.8 21.1 19H2.9C2.3 17.8 2 16.5 2 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 15L16 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 15C13 15.552 12.552 16 12 16C11.448 16 11 15.552 11 15C11 14.448 11.448 14 12 14C12.552 14 13 14.448 13 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-gpu" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M2 7.5C2 6.12 3.12 5 4.5 5H19.5C20.88 5 22 6.12 22 7.5V15.5C22 16.88 20.88 18 19.5 18H4.5C3.12 18 2 16.88 2 15.5V7.5Z" fill="currentColor"></path><path d="M2 7.5C2 6.12 3.12 5 4.5 5H19.5C20.88 5 22 6.12 22 7.5V15.5C22 16.88 20.88 18 19.5 18H4.5C3.12 18 2 16.88 2 15.5V7.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.5 11.5C12.5 13.433 10.933 15 9 15C7.067 15 5.5 13.433 5.5 11.5C5.5 9.567 7.067 8 9 8C10.933 8 12.5 9.567 12.5 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 9V14M19 9V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 18V20.5M10 18V20.5M14 18V20.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M12 3L22 8L12 13L2 8L12 3Z" fill="currentColor"></path><path d="M12 3L22 8L12 13L2 8L12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 16L12 21L22 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-thermometer" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M14 14.76V5C14 3.895 13.105 3 12 3C10.895 3 10 3.895 10 5V14.76C8.8 15.45 8 16.73 8 18.2C8 20.4 9.8 22 12 22C14.2 22 16 20.4 16 18.2C16 16.73 15.2 15.45 14 14.76Z" fill="currentColor"></path><path d="M14 14.76V5C14 3.895 13.105 3 12 3C10.895 3 10 3.895 10 5V14.76C8.8 15.45 8 16.73 8 18.2C8 20.4 9.8 22 12 22C14.2 22 16 20.4 16 18.2C16 16.73 15.2 15.45 14 14.76Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 17.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M13 2L4 14H11L10 22L20 9.5H13L13 2Z" fill="currentColor"></path><path d="M13 2L4 14H11L10 22L20 9.5H13L13 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-link" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M8.46 20.06L14.26 14.26A3.2 3.2 0 0 0 9.74 9.74L3.94 15.54A3.2 3.2 0 0 0 8.46 20.06Z" fill="currentColor"></path><path d="M10 13C10.43 13.57 10.98 14.05 11.61 14.39C12.24 14.74 12.93 14.94 13.65 14.99C14.36 15.04 15.08 14.94 15.75 14.69C16.42 14.44 17.03 14.05 17.54 13.54L20.54 10.54C21.45 9.6 21.95 8.33 21.94 7.02C21.93 5.71 21.41 4.46 20.48 3.53C19.55 2.6 18.3 2.08 16.99 2.07C15.68 2.06 14.41 2.56 13.47 3.47L11.75 5.18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 11C13.57 10.43 13.02 9.95 12.39 9.61C11.76 9.26 11.07 9.06 10.35 9.01C9.64 8.96 8.92 9.06 8.25 9.31C7.58 9.56 6.97 9.95 6.46 10.46L3.46 13.46C2.55 14.4 2.05 15.67 2.06 16.98C2.07 18.29 2.59 19.54 3.52 20.47C4.45 21.4 5.7 21.92 7.01 21.93C8.32 21.94 9.59 21.44 10.53 20.53L12.24 18.82" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M6 9C6 7.343 7.343 6 9 6H15C16.657 6 18 7.343 18 9V15C18 16.657 16.657 18 15 18H9C7.343 18 6 16.657 6 15V9Z" fill="currentColor"></path><path d="M6 9C6 7.343 7.343 6 9 6H15C16.657 6 18 7.343 18 9V15C18 16.657 16.657 18 15 18H9C7.343 18 6 16.657 6 15V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11C10 10.448 10.448 10 11 10H13C13.552 10 14 10.448 14 11V13C14 13.552 13.552 14 13 14H11C10.448 14 10 13.552 10 13V11Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.5 2.5V6M14.5 2.5V6M9.5 18V21.5M14.5 18V21.5M2.5 9.5H6M2.5 14.5H6M18 9.5H21.5M18 14.5H21.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-disk" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M2 9C2 7.343 3.343 6 5 6H19C20.657 6 22 7.343 22 9V15C22 16.657 20.657 18 19 18H5C3.343 18 2 16.657 2 15V9Z" fill="currentColor"></path><path d="M2 9C2 7.343 3.343 6 5 6H19C20.657 6 22 7.343 22 9V15C22 16.657 20.657 18 19 18H5C3.343 18 2 16.657 2 15V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 12H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17.5 12H17.51" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79Z" fill="currentColor"></path><path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24" fill="none"><path opacity="0.12" d="M16 12C16 14.209 14.209 16 12 16C9.791 16 8 14.209 8 12C8 9.791 9.791 8 12 8C14.209 8 16 9.791 16 12Z" fill="currentColor"></path><path d="M16 12C16 14.209 14.209 16 12 16C9.791 16 8 14.209 8 12C8 9.791 9.791 8 12 8C14.209 8 16 9.791 16 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+</svg>
+<div id="scene">
+  <header class="st-header">
+    <span class="st-header__brand">Strata</span>
+    <nav class="st-tabs" aria-label="Views">
+      <span class="st-tab" aria-selected="true"><svg class="st-icon st-icon--sm" aria-hidden="true"><use href="#i-activity"/></svg>Monitor</span>
+    </nav>
+    <span class="header-model muted" id="model">&ndash;</span>
+    <span class="st-header__spacer"></span>
+    <span class="header-clock muted" id="clock">--:--:--</span>
+    <span class="st-pill" id="pill" data-state="idle" role="status" aria-live="polite">
+      <span class="st-pill__dot"></span><span id="pill-text">Connecting&hellip;</span></span>
+    <button class="st-btn st-btn--icon" id="theme-btn" title="Light / dark" aria-label="Switch between light and dark">
+      <svg class="st-icon" aria-hidden="true"><use id="theme-icon" href="#i-sun"/></svg></button>
+  </header>
+
+  <main class="monitor">
+    <div class="monitor-left">
+      <div class="st-card state-card">
+        <div class="state-card__head">
+          <div class="state-card__title-row">
+            <span class="card-title">Model state</span>
+            <span class="badges" id="state-badges">
+              <span class="st-badge" data-s="idle">Idle</span>
+              <span class="st-badge st-badge--reading" data-s="reading">Reading</span>
+              <span class="st-badge st-badge--generating" data-s="generating">Generating</span>
+              <span class="st-badge st-badge--queued" data-s="queued">Queued</span>
+              <span class="st-badge st-badge--error" data-s="error">Error</span>
+            </span>
+          </div>
+          <div class="state-card__row"><span id="state-label">Waiting for a request</span><span class="muted" id="state-detail"></span></div>
+        </div>
+        <div class="st-progress" id="state-progress"><div class="st-progress__bar" id="state-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="metrics" id="metrics">
+        <!-- filled by app.js: Speed, GPU load, VRAM, GPU temp, Power, PCIe, CPU, Disk read -->
+      </div>
+    </div>
+
+    <div class="monitor-right">
+      <div class="st-card ctx-card">
+        <span class="card-title">Context fill</span>
+        <div class="ctx-body">
+          <div class="ctx-gauge">
+            <svg class="st-gauge" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="st-gauge__track" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round"
+                      stroke-dasharray="235.6 314.2" transform="rotate(135 60 60)"/>
+              <circle class="st-gauge__fill" id="ctx-fill" cx="60" cy="60" r="50" fill="none" stroke-width="10"
+                      stroke-linecap="round" stroke-dasharray="0 314.2" transform="rotate(135 60 60)"/>
+            </svg>
+            <div class="ctx-gauge__label"><span class="ctx-gauge__pct" id="ctx-pct">0%</span><span class="muted" id="ctx-sub">&ndash;</span></div>
+          </div>
+          <div class="ctx-bars">
+            <div class="bar-row"><span>Experts in VRAM</span><span class="muted" id="slots-text">&ndash;</span></div>
+            <div class="st-progress"><div class="st-progress__bar" id="slots-bar" style="width:0%"></div></div>
+            <div class="bar-row"><span>System RAM</span><span class="muted" id="ram-text">&ndash;</span></div>
+            <div class="st-progress" id="ram-progress"><div class="st-progress__bar" id="ram-bar" style="width:0%"></div></div>
+            <div class="bar-row"><span>GPU temperature</span><span class="muted" id="temp-text">&ndash;</span></div>
+            <div class="st-progress" data-tone="warn"><div class="st-progress__bar" id="temp-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="st-card req-card">
+        <div class="req-head"><span class="card-title">Recent requests</span><span class="muted small" id="req-count"></span></div>
+        <div class="table-wrap">
+          <table class="st-table">
+            <thead><tr><th>Time</th><th>Status</th><th class="num">Prompt</th><th class="num">Reused</th><th class="num">Output</th>
+              <th class="num">Tok/s</th><th class="num">VRAM hit rate</th><th class="num">Duration</th></tr></thead>
+            <tbody id="req-body"><tr><td colspan="8" class="muted">No requests yet</td></tr></tbody>
+          </table>
+        </div>
+        <p class="muted req-totals" id="req-totals"></p>
+      </div>
+    </div>
+  </main>
+</div>
+<script>window.icueEvents = {};</script>
+<script src="app.js"></script>
+</body>
+</html>

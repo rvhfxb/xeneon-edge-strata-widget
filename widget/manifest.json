@@ -1,0 +1,13 @@
+{
+  "author": "rvhfxb",
+  "id": "com.rvhfxb.strata-edge",
+  "name": "Strata Edge",
+  "description": "Strata web UI Monitor tab for XENEON EDGE (read-only, local Strata 127.0.0.1:8086)",
+  "version": "0.1.4",
+  "preview_icon": "resources/icon.svg",
+  "min_framework_version": "1.0.0",
+  "min_app_version": "5.51",
+  "os": [{"platform": "windows"}],
+  "supported_devices": [{"type": "dashboard_lcd"}],
+  "interactive": true
+}

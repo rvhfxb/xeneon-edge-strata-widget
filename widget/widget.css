@@ -1,0 +1,81 @@
+/* Strata Edge - the Strata web app's Monitor tab on a 2560x720 XENEON EDGE.
+   Colours, type, radii and shadows come only from Strata's tokens.css + components.css (copied verbatim).
+   The rules below are Strata's app.css monitor rules, re-laid out for a fixed 32:9 canvas.
+   The canvas is 2048x576 CSS px and app.js scales it to fit (x1.25 on the full panel). */
+[hidden] { display: none !important; }
+html, body { height: 100%; overflow: hidden; background: var(--st-bg); }
+body { position: relative; }
+.muted { color: var(--st-ink-muted); }
+.small { font-size: var(--st-fs-xs); }
+.card-title { font-weight: var(--st-fw-bold); font-size: var(--st-fs-base); color: var(--st-ink); }
+
+#scene { position: absolute; left: 0; top: 0; width: 2048px; height: 576px; transform-origin: 0 0; display: flex;
+         flex-direction: column; background: var(--st-bg); overflow: hidden; }
+
+/* header: Strata's, with only the Monitor tab */
+.st-header { flex: none; position: relative; z-index: 2; }
+.st-header .st-tabs { margin-left: var(--st-s-4); }
+.st-header .st-tab { cursor: default; }
+.header-model { font-size: var(--st-fs-sm); font-weight: var(--st-fw-medium); min-width: 0; max-width: 720px; overflow: hidden;
+                text-overflow: ellipsis; white-space: nowrap; }
+.header-clock { font-size: var(--st-fs-sm); font-weight: var(--st-fw-medium); font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- monitor */
+/* ---------------------------------------------------------------- monitor */
+.monitor { flex: 1; min-height: 0; display: grid; grid-template-columns: 1220px minmax(0, 1fr); gap: var(--st-s-4);
+           padding: var(--st-s-5) var(--st-s-6); }
+.monitor-left { display: flex; flex-direction: column; gap: var(--st-s-4); min-height: 0; min-width: 0; }
+.monitor-right { display: flex; flex-direction: column; gap: var(--st-s-4); min-height: 0; min-width: 0; }
+
+.state-card { display: flex; flex-direction: column; gap: var(--st-s-2); padding: var(--st-s-3) var(--st-s-5); }
+.state-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--st-s-4); }
+.state-card__title-row { display: flex; align-items: center; gap: var(--st-s-3); }
+.badges { display: flex; gap: var(--st-s-2); flex-wrap: wrap; }
+.badges .st-badge { opacity: .38; transition: opacity var(--st-dur); }
+.badges .st-badge.on { opacity: 1; }
+.state-card__row { display: flex; align-items: center; gap: var(--st-s-3); font-size: var(--st-fs-sm);
+                   font-weight: var(--st-fw-medium); font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: auto; }
+.state-card__row > span { overflow: hidden; text-overflow: ellipsis; }
+
+.metrics { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: 1fr 1fr;
+           gap: var(--st-s-4); min-height: 0; }
+.metric-card { padding: var(--st-s-4) var(--st-s-5); display: flex; min-width: 0; min-height: 0; }
+.metric-card .st-metric { flex: 1; min-width: 0; }
+.st-metric__value { white-space: nowrap; }
+.st-metric__value small { font-size: var(--st-fs-md); font-weight: var(--st-fw-medium); color: var(--st-ink-muted); margin-left: 4px; }
+.st-metric__sub { font-size: var(--st-fs-xs); color: var(--st-ink-muted); font-variant-numeric: tabular-nums; min-height: 1em;
+                  line-height: 1.35; overflow-wrap: anywhere; }
+.st-metric__spark { display: block; overflow: visible; flex: 1; min-height: 32px; margin-top: auto; }
+.speed-values { display: flex; justify-content: space-between; gap: var(--st-s-3); }
+.speed-values > div { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.speed-values > div:last-child { text-align: right; }
+.st-metric__spark .speed-prefill { color: color-mix(in srgb, var(--st-accent) 65%, black); }
+.st-metric__spark[data-tone="warn"] { color: var(--st-warn); }
+.st-metric__spark[data-tone="info"] { color: var(--st-info); }
+
+.ctx-card { display: flex; flex-direction: column; gap: var(--st-s-2); padding: var(--st-s-3) var(--st-s-5); flex: none; }
+.ctx-body { display: flex; align-items: center; gap: var(--st-s-4); }
+.ctx-gauge { position: relative; flex: none; width: 96px; height: 96px; }
+.ctx-gauge .st-gauge { width: 96px; height: 96px; }
+.ctx-gauge .st-gauge__fill { transition: stroke-dasharray 400ms var(--st-ease); }
+.ctx-gauge__label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    font-size: var(--st-fs-xs); font-variant-numeric: tabular-nums; }
+.ctx-gauge__pct { font-weight: var(--st-fw-black); font-size: var(--st-fs-lg); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ctx-bars { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bar-row { display: flex; justify-content: space-between; gap: var(--st-s-2); font-size: var(--st-fs-xs); font-weight: var(--st-fw-medium);
+           margin-top: 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ctx-bars .bar-row:first-child { margin-top: 0; }
+
+.req-card { flex: 1; display: flex; flex-direction: column; gap: var(--st-s-2); padding: var(--st-s-3) var(--st-s-5); min-width: 0; min-height: 0; }
+.req-head { display: flex; align-items: center; justify-content: space-between; gap: var(--st-s-2); }
+.table-wrap { flex: 1; min-height: 0; overflow: hidden; }
+.req-card .st-table { font-size: var(--st-fs-xs); }
+.req-card .st-table th { padding: 6px 6px; white-space: nowrap; }
+.req-card .st-table td { padding: 5px 6px; white-space: nowrap; }
+.req-card .st-table th:first-child, .req-card .st-table td:first-child { padding-left: 0; }
+.req-card .st-table th:last-child, .req-card .st-table td:last-child { padding-right: 0; }
+.req-card .st-table .st-badge { height: 20px; padding: 0 6px; font-size: 11px; }
+.req-card .st-table .st-badge + .st-badge { margin-left: 4px; }
+.req-card .st-table tr:hover td { background: transparent; }
+.req-totals { margin: 0; font-size: var(--st-fs-xs); line-height: 1.35; }
+.req-totals:empty { display: none; }

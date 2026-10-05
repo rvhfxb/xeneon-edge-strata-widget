@@ -1,5 +1,6 @@
 . (Join-Path $PSScriptRoot 'Helper-Common.ps1')
-if (Get-EdgeTask) {
-    Stop-ScheduledTask -TaskName $edgeTaskName
-    Write-Output 'Helper stopped. It will start again at the next logon.'
+$edgeTask = Get-EdgeTask
+if ($edgeTask) {
+    Stop-EdgeTask $edgeTask
+    Write-Output 'Helper stopped (or already stopped). Logon startup remains unchanged.'
 } else { Write-Output 'This helper is not installed.' }

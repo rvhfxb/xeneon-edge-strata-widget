@@ -1,4 +1,4 @@
-/* Strata UI 窶・tokens. Derived from the Gainsty design system.
+/* Strata UI — tokens. Derived from the Gainsty design system.
    Light is default; dark via <html data-theme="dark">.
    Values marked (derived) are not in the Gainsty source and were added for the app. */
 
@@ -25,7 +25,7 @@
   /* motion (derived) */
   --st-ease:cubic-bezier(.2,.7,.2,1); --st-dur:160ms;
 
-  /* color 窶・light */
+  /* color — light */
   --st-bg:#f9fafb;
   --st-surface:#ffffff;
   --st-surface-2:#f7f7f7;
@@ -55,7 +55,7 @@
   color-scheme:light;
 }
 
-/* color 窶・dark (all derived) */
+/* color — dark (all derived) */
 [data-theme="dark"]{
   --st-bg:#0e1113;
   --st-surface:#161a1d;

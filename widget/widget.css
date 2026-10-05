@@ -1,5 +1,5 @@
 /* Strata Edge - the Strata web app's Monitor tab on a 2560x720 XENEON EDGE.
-   Colours, type, radii and shadows come only from Strata's tokens.css + components.css (copied verbatim).
+   Colours, type, radii and shadows come from Strata's tokens.css + components.css (local font URLs).
    The rules below are Strata's app.css monitor rules, re-laid out for a fixed 32:9 canvas.
    The canvas is 2048x576 CSS px and app.js scales it to fit (x1.25 on the full panel). */
 [hidden] { display: none !important; }
@@ -20,7 +20,6 @@ body { position: relative; }
                 text-overflow: ellipsis; white-space: nowrap; }
 .header-clock { font-size: var(--st-fs-sm); font-weight: var(--st-fw-medium); font-variant-numeric: tabular-nums; }
 
-/* ---------------------------------------------------------------- monitor */
 /* ---------------------------------------------------------------- monitor */
 .monitor { flex: 1; min-height: 0; display: grid; grid-template-columns: 1220px minmax(0, 1fr); gap: var(--st-s-4);
            padding: var(--st-s-5) var(--st-s-6); }

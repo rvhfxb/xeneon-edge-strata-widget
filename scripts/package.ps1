@@ -1,6 +1,12 @@
 param([string]$OutDir = (Join-Path $PSScriptRoot '..\..\artifacts'))
 $ErrorActionPreference = 'Stop'
 $edgeRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+function Get-EdgeFileHash([string]$Path) {
+    $edgeStream = [IO.File]::OpenRead($Path)
+    $edgeSha = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($edgeSha.ComputeHash($edgeStream)).Replace('-','').ToLower() }
+    finally { $edgeStream.Dispose(); $edgeSha.Dispose() }
+}
 $edgeManifest = Get-Content -LiteralPath (Join-Path $edgeRoot 'widget\manifest.json') -Raw | ConvertFrom-Json
 $edgeVersion = $edgeManifest.version
 if ($edgeVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid version.' }
@@ -11,6 +17,10 @@ $OutDir = (Resolve-Path $OutDir).Path
 $edgeWidget = Join-Path $OutDir "strata-edge-$edgeVersion.icuewidget"
 & node (Join-Path $PSScriptRoot 'test-import.cjs')
 if ($LASTEXITCODE -ne 0) { throw 'Import validation failed.' }
+& node (Join-Path $PSScriptRoot 'check-production.cjs')
+if ($LASTEXITCODE -ne 0) { throw 'Development code was found in the production widget.' }
+& node (Join-Path $PSScriptRoot 'test-upstream.cjs')
+if ($LASTEXITCODE -ne 0) { throw 'Pinned CSS validation failed.' }
 & node $edgeCli package (Join-Path $edgeRoot 'widget') --output $edgeWidget
 if ($LASTEXITCODE -ne 0) { throw 'iCUE package failed.' }
 # A fresh staging folder prevents logs, personal snapshots or development files
@@ -28,12 +38,14 @@ foreach ($edgeFile in @('README.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICE
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'server.cjs') -Destination (Join-Path $edgeStage 'scripts')
 $edgeChecksums = Get-ChildItem -LiteralPath $edgeStage -File -Recurse | Sort-Object FullName | ForEach-Object {
     $edgeRelative = $_.FullName.Substring($edgeStage.Length + 1).Replace('\','/')
-    (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower() + '  ' + $edgeRelative
+    (Get-EdgeFileHash $_.FullName) + '  ' + $edgeRelative
 }
 $edgeChecksums | Set-Content -LiteralPath (Join-Path $edgeStage 'SHA256SUMS.txt') -Encoding ascii
 $edgeArchive = Join-Path $OutDir "strata-edge-$edgeVersion.zip"
-Compress-Archive -LiteralPath $edgeStage -DestinationPath $edgeArchive -Force
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+if (Test-Path -LiteralPath $edgeArchive) { Remove-Item -LiteralPath $edgeArchive -Force }
+[IO.Compression.ZipFile]::CreateFromDirectory($edgeStageParent, $edgeArchive)
 @($edgeWidget,$edgeArchive) | ForEach-Object {
-    (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLower() + '  ' + [IO.Path]::GetFileName($_)
+    (Get-EdgeFileHash $_) + '  ' + [IO.Path]::GetFileName($_)
 } | Set-Content -LiteralPath (Join-Path $OutDir "strata-edge-$edgeVersion-SHA256SUMS.txt") -Encoding ascii
 Write-Output ('Release: ' + $edgeArchive)

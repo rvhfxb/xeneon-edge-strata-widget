@@ -6,6 +6,8 @@ Strata Edge is an independent community widget by rvhfxb. It is not an official 
 
 Monitor rendering adapted from `serve/web/app.js`; design tokens, components, font declarations and inline SVG icons derived from the Strata Web UI.
 
+CSS is pinned to commit `6f32ec070f23ced9f50e704d854d775da52591ab` (v0.1.39). The only tokens.css substitutions are the two font URLs from `../fonts/` to `resources/fonts/`; components.css matches upstream. Source hash records are in the development repository's `upstream-assets.json`.
+
 Copyright (c) 2026 Niko1221 and the Strata contributors. MIT license.
 Full notice: `widget/resources/STRATA-LICENSE.txt`.
 

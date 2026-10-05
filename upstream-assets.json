@@ -1,0 +1,22 @@
+{
+  "repository": "Niko1221/Strata",
+  "normalization": "UTF-8 with LF line endings",
+  "version": "v0.1.39",
+  "commit": "6f32ec070f23ced9f50e704d854d775da52591ab",
+  "assets": [
+    {
+      "upstreamSha256": "73ad21bfdd4145fae697dec37c2909ecec67d610f96cb2267c29a5526ed13256",
+      "localSha256": "a22b2ff7e030fe67398cc7ff0479e8374d8925a6520bba004fcb5eb09138906d",
+      "localPath": "widget/tokens.css",
+      "fontUrlsAdjusted": true,
+      "upstreamPath": "serve/web/tokens.css"
+    },
+    {
+      "upstreamSha256": "e4b4895a62193c27bbe9fd8eb651c93bd9f50bf638e073620d47886b2c2c2f8b",
+      "localSha256": "e4b4895a62193c27bbe9fd8eb651c93bd9f50bf638e073620d47886b2c2c2f8b",
+      "localPath": "widget/components.css",
+      "fontUrlsAdjusted": false,
+      "upstreamPath": "serve/web/components.css"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const {createServer,createProvider,validateUpstream} = require('./server.cjs');
+const {createServer,createProvider,validateUpstream,readConfig} = require('./server.cjs');
 test('bridge accepts only read-only localhost requests and approved widget origins',async () => {
   const server = createServer({read:async () => ({available:true,timestamp:Date.now()})});
   await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
@@ -18,10 +18,25 @@ test('bridge accepts only read-only localhost requests and approved widget origi
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
 test('configuration accepts local origins and rejects credentials, remote hosts and API paths', () => {
-  assert.equal(validateUpstream('http://localhost:8080/'), 'http://localhost:8080');
+  assert.equal(validateUpstream('http://localhost:8080/'), 'http://127.0.0.1:8080');
+  assert.equal(validateUpstream('http://[::1]:8080'), 'http://[::1]:8080');
+  assert.throws(() => validateUpstream('bad URL'), /strataUrl must be a local HTTP server origin/);
   for (const url of ['https://127.0.0.1:8086', 'http://example.com', 'http://127.0.0.1:8086/v1', 'http://user:pass@127.0.0.1:8086', 'http://127.0.0.1:8086/?key=secret']) {
     assert.throws(() => validateUpstream(url));
   }
+});
+test('missing config/key and null key use the default; malformed configuration is actionable', t => {
+  const fs=require('node:fs'), os=require('node:os'), path=require('node:path');
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'strata-edge-config-')), file=path.join(dir,'config.json');
+  t.after(()=>{fs.unlinkSync(file);fs.rmdirSync(dir);});
+  assert.equal(readConfig(file),'http://127.0.0.1:8086');
+  for (const config of [{},{strataUrl:null}]) {
+    fs.writeFileSync(file,JSON.stringify(config)); assert.equal(readConfig(file),'http://127.0.0.1:8086');
+  }
+  for (const config of [null,[],'text']) {
+    fs.writeFileSync(file,JSON.stringify(config)); assert.throws(()=>readConfig(file),/must contain a JSON object/);
+  }
+  fs.writeFileSync(file,JSON.stringify({strataUrl:'bad URL'}));assert.throws(()=>readConfig(file),/strataUrl must be/);
 });
 test('custom local upstream remains GET-only and reports authorization failures', async () => {
   const calls = [];

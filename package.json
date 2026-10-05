@@ -1,12 +1,12 @@
 {
   "name": "strata-edge",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "license": "MIT",
   "engines": { "node": ">=22" },
   "scripts": {
     "start": "node scripts/server.cjs",
-    "test": "node --test scripts/test-server.cjs",
+    "test": "node --test scripts/test-server.cjs && node scripts/test-upstream.cjs && node scripts/check-production.cjs",
     "verify": "node scripts/verify-browser.cjs",
     "validate": "node scripts/test-import.cjs widget/index.html && icuewidget validate widget",
     "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1"

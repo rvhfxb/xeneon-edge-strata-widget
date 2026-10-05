@@ -4,6 +4,7 @@ const {spawn} = require('node:child_process');
 const {pathToFileURL} = require('node:url');
 const root = path.resolve(__dirname, '..');
 const out = path.resolve(process.argv[2] || path.join(root, 'dist/browser-check'));
+const live = process.argv.includes('--live');
 const chrome = [process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)'], process.env.LOCALAPPDATA]
   .filter(Boolean).map(p => path.join(p, 'Google/Chrome/Application/chrome.exe')).find(p => fs.existsSync(p));
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -44,11 +45,13 @@ async function main() {
     ({sessionId:session}=await send('Target.attachToTarget',{targetId,flatten:true},null));
     await send('Page.enable'); await send('Runtime.enable');
     const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text);return r.result.value;};
-    await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.widgetTheme="dark";window.__snapshot='+JSON.stringify(fixture)+';window.__fail=false;window.__stale=false;window.fetch=async()=>{if(window.__fail)throw Error("offline");return {ok:true,json:async()=>({...window.__snapshot,timestamp:Date.now()-(window.__stale?11000:0)})}};'});
-    const page = pathToFileURL(path.join(root,'widget/index.html')).href+'?check';
+    await send('Page.addScriptToEvaluateOnNewDocument',{source:fs.readFileSync(path.join(__dirname,'layout-check.js'),'utf8')});
+    await send('Page.addScriptToEvaluateOnNewDocument',{source:live ? 'window.widgetTheme="dark";' : 'window.widgetTheme="dark";window.__snapshot='+JSON.stringify(fixture)+';window.__fail=false;window.__stale=false;window.fetch=async()=>{if(window.__fail)throw Error("offline");return {ok:true,json:async()=>({...window.__snapshot,timestamp:Date.now()-(window.__stale?11000:0)})}};'});
+    const page = pathToFileURL(path.join(root,'widget/index.html')).href;
     await send('Emulation.setDeviceMetricsOverride',{width:1280,height:360,deviceScaleFactor:1,mobile:false});
     await send('Page.navigate',{url:page}); await delay(700);
     const text=async id=>evaluate(`document.getElementById(${JSON.stringify(id)}).textContent`);
+    if (!live) {
     assert.equal(await text('pill-text'),'Idle');
     assert.equal(await text('mv-prefill'),'100t/s');
     const graph=await evaluate('document.querySelector("#sp-prefill .line").getAttribute("d")');
@@ -67,13 +70,17 @@ async function main() {
     await evaluate('window.__snapshot.metrics.live={state:"generating",generated:200,max_tokens:512,tok_s:77,prefill_tok_s_mean:1800};window.__snapshot.metrics.requests[0].finish="error";window.__snapshot.health.model="<img src=x onerror=alert(1)>"');await delay(2100);
     assert.equal(await text('mv-speed'),'77.0t/s');assert.equal(await evaluate('document.getElementById("model").children.length'),0);
     report.checks.push({name:'generation and safe server text'});
+    }
     for (const theme of ['dark','light']) for(const [width,height] of [[2560,720],[1280,360],[736,207]]) {
       await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
-      await evaluate(`window.widgetTheme=${JSON.stringify(theme)};window.icueEvents.onDataUpdated();window.dispatchEvent(new Event('resize'))`); await delay(600);
+      await evaluate(`window.widgetTheme=${JSON.stringify(theme)};window.icueEvents.onDataUpdated()`); await delay(600);
+      const expectedScale=Math.min(width/2048,height/576);
+      assert.equal(await evaluate('document.getElementById("scene").style.transform'),`scale(${expectedScale})`);
       const layout=JSON.parse(await evaluate('document.body.dataset.check'));assert.deepEqual(layout.bad,[]);
       report.checks.push({name:`layout ${width}x${height} ${theme}`,layout});
       const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(out,`${width}x${height}-${theme}.png`),Buffer.from(shot.data,'base64'));
     }
+    if (!live) {
     await evaluate('window.__snapshot.metrics.live={state:"idle",queued:0};window.__snapshot.health.loaded=false'); await delay(2100);
     assert.equal(await text('pill-text'),'Model not loaded'); report.checks.push({name:'unloaded state'});
     await evaluate('window.__stale=true'); await delay(2100);
@@ -82,6 +89,7 @@ async function main() {
     assert.equal(await text('pill-text'),'API key needed');report.checks.push({name:'authentication failure'});
     await evaluate('window.__fail=true');await delay(2100);
     assert.equal(await text('pill-text'),'Server not reachable');assert.equal(await text('mv-prefill'),'–');report.checks.push({name:'network failure clears values'});
+    }
     assert.deepEqual(report.exceptions,[]);
   } finally {fs.writeFileSync(path.join(out,'behavior.json'),JSON.stringify(report,null,2));socket?.close();child.kill();}
   console.log(`Browser checks passed: ${report.checks.length}; JS exceptions: ${report.exceptions.length}; ${out}`);

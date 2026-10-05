@@ -176,7 +176,7 @@
     setMetric("cpu", hw.cpu == null ? null : fmt(hw.cpu), "%", st.threads ? `${st.cores ? `${st.cores} cores · ` : ""}${st.threads} threads` : "");
     spark("sp-cpu", h.cpu, 100);
     if (hw.disk_read_mb == null) {
-      setMetric("disk", null, "", st.psutil === false ? "needs psutil (setup installs it)" : "");
+      setMetric("disk", null, "", st.psutil === false ? "needs psutil in Strata" : "");
     } else {
       const big = hw.disk_read_mb >= 1000;
       setMetric("disk", big ? fmt(hw.disk_read_mb / 1024, 2) : fmt(hw.disk_read_mb, hw.disk_read_mb < 10 ? 1 : 0), big ? "GB/s" : "MB/s",
@@ -259,36 +259,23 @@
   setInterval(() => { if (lastSuccess && Date.now() - lastSuccess >= STALE_MS) { lastSuccess = 0; offline(); } }, 1000);
 
   const W = 2048, H = 576;
+  let lastFitSize = "";
   function fit() {
     const w = document.documentElement.clientWidth, h = document.documentElement.clientHeight, scale = Math.min(w / W, h / H);
+    const size = `${w}x${h}`;
+    if (size === lastFitSize) return;
+    lastFitSize = size;
     const scene = $("scene");
     scene.style.transform = `scale(${scale})`;
     scene.style.left = `${(w - W * scale) / 2}px`;
     scene.style.top = `${(h - H * scale) / 2}px`;
   }
   function clock() { $("clock").textContent = new Date().toLocaleTimeString("en-GB"); }
-  window.addEventListener("resize", fit); fit(); setInterval(fit, 1000);
+  window.addEventListener("resize", fit); fit();
+  if (typeof ResizeObserver === "function") new ResizeObserver(fit).observe(document.documentElement);
+  else setInterval(fit, 1000); // Compatibility with older embedded browsers.
   clock(); setInterval(clock, 1000);
   offline("connecting"); setPill("idle", "Connecting…");
   poll();
 
-  // ?check: a layout self-test for headless verification (writes findings to <body data-check>)
-  if (/[?&]check\b/.test(location.search)) {
-    if (/[?&]light\b/.test(location.search)) setTheme("light", false);
-    setInterval(() => {
-      const bad = [];
-      const over = (el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
-      for (const el of document.querySelectorAll(".st-card, .table-wrap, .st-header, .monitor")) if (over(el)) bad.push(`overflow:${el.className}`);
-      for (const el of document.querySelectorAll(".st-metric__sub, .bar-row, .state-card__row span, .st-metric__value")) {
-        if (el.scrollWidth > el.clientWidth + 1) bad.push(`clipped:${el.id || el.className}:${el.textContent.trim()}`);
-      }
-      const b = [...document.querySelectorAll("#state-badges .st-badge")].map((x) => x.offsetTop);
-      if (new Set(b).size > 1) bad.push("badges-wrap");
-      const colLeft = document.querySelector(".col--left")?.offsetWidth;
-      const metricsW = document.querySelector(".metrics")?.offsetWidth;
-      const reqW = document.querySelector(".req-card")?.offsetWidth;
-      const cards = [...document.querySelectorAll(".metric-card")].map(c => c.offsetWidth);
-      document.body.dataset.check = JSON.stringify({rows: $("req-body").rows.length, pill: $("pill-text").textContent, bad, widths: { colLeft, metricsW, reqW, cards: cards.slice(0, 4) }});
-    }, 500);
-  }
 })();

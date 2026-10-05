@@ -5,18 +5,21 @@ const path = require('node:path');
 const PORT = 5199;
 const DEFAULT_UPSTREAM = 'http://127.0.0.1:8086';
 function validateUpstream(value) {
-  const url = new URL(value);
+  const message = 'strataUrl must be a local HTTP server origin, e.g. http://127.0.0.1:8086';
+  let url;
+  try { url = new URL(value); } catch (_) { throw new Error(message); }
   if (url.protocol !== 'http:' || !['127.0.0.1','localhost','[::1]'].includes(url.hostname) ||
       url.username || url.password || url.search || url.hash || url.pathname !== '/') {
-    throw new Error('strataUrl must be a local HTTP server origin, e.g. http://127.0.0.1:8086');
+    throw new Error(message);
   }
+  if (url.hostname === 'localhost') url.hostname = '127.0.0.1';
   return url.origin;
 }
-function readConfig() {
-  const configPath = path.resolve(__dirname, '../helper.config.json');
+function readConfig(configPath = path.resolve(__dirname, '../helper.config.json')) {
   if (!fs.existsSync(configPath)) return DEFAULT_UPSTREAM;
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8').replace(/^\uFEFF/, ''));
-  return validateUpstream(config.strataUrl);
+  if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('helper.config.json must contain a JSON object.');
+  return validateUpstream(config.strataUrl ?? DEFAULT_UPSTREAM);
 }
 const root = path.resolve(__dirname, '../widget');
 const origins = new Set(['null', 'file://', 'http://127.0.0.1:5199', 'http://localhost:5199']);

@@ -17,15 +17,30 @@ function Assert-EdgePortFree {
     }
 }
 
+function Stop-EdgeTask($Task) {
+    if ($Task.State -in @('Running', 'Queued')) {
+        try { Stop-ScheduledTask -TaskName $edgeTaskName }
+        catch {
+            # The task may finish between the state read and stop request.
+            $edgeCurrent = Get-EdgeTask
+            if ($edgeCurrent -and $edgeCurrent.State -notin @('Ready', 'Disabled')) { throw }
+        }
+    }
+}
+
+function Test-EdgeHelper {
+    try {
+        $edgeReply = Invoke-RestMethod -Uri 'http://127.0.0.1:5199/api/snapshot' -TimeoutSec 2
+        return ($edgeReply.available -is [bool])
+    } catch { return $false }
+}
+
 function Wait-EdgeHelper {
     for ($edgeAttempt = 0; $edgeAttempt -lt 20; $edgeAttempt++) {
-        try {
-            $edgeReply = Invoke-RestMethod -Uri 'http://127.0.0.1:5199/api/snapshot' -TimeoutSec 5
-            if ($null -ne $edgeReply.available) {
-                Write-Output ('Helper ready: http://127.0.0.1:5199/ (Strata available: ' + $edgeReply.available + ')')
-                return
-            }
-        } catch { }
+        if (Test-EdgeHelper) {
+            Write-Output 'Helper ready: http://127.0.0.1:5199/'
+            return
+        }
         Start-Sleep -Milliseconds 500
     }
     throw 'Helper did not start. Read helper-error.log and check that port 5199 is free.'

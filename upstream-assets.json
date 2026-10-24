@@ -1,8 +1,8 @@
 {
   "repository": "Niko1221/Strata",
   "normalization": "UTF-8 with LF line endings",
-  "version": "v0.1.39",
-  "commit": "6f32ec070f23ced9f50e704d854d775da52591ab",
+  "version": "v0.2.4",
+  "commit": "96ca4383c7b05a8a3e6064c65d9e9977d4b3bb59",
   "assets": [
     {
       "upstreamSha256": "73ad21bfdd4145fae697dec37c2909ecec67d610f96cb2267c29a5526ed13256",

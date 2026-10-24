@@ -37,6 +37,25 @@ test('missing config/key and null key use the default; malformed configuration i
     fs.writeFileSync(file,JSON.stringify(config)); assert.throws(()=>readConfig(file),/must contain a JSON object/);
   }
   fs.writeFileSync(file,JSON.stringify({strataUrl:'bad URL'}));assert.throws(()=>readConfig(file),/strataUrl must be/);
+  fs.writeFileSync(file,JSON.stringify({strataUrl:'http://127.0.0.1:8091'}));
+  assert.equal(readConfig(undefined,file),'http://127.0.0.1:8091');
+  fs.writeFileSync(file,JSON.stringify({strataUrl:'http://remote.test:8091'}));
+  assert.throws(()=>readConfig(undefined,file),/strataUrl must be/);
+});
+
+test('Strata 0.2.4 DeepSeek telemetry passes through without inventing Qwen-only fields',async () => {
+  const metrics = {engine:{engine_kind:'ds4',expert_slots:2167,context:65536,max_context:65536,kv:'fp4',drafting:'off'},
+    live:{state:'idle',queued:0},conversation_cache:{enabled:false,last_prompt:1734,last_reused:881},
+    requests:[{prompt_tokens:1734,reused:881,prompt_ms:8660.6,decode_tok_s:21.6,projection:null,hit_rate:null}]};
+  const calls=[];
+  const provider=createProvider(async (url,options)=>{
+    calls.push({url,method:options.method});
+    return {ok:true,json:async()=>url.endsWith('/health')?{service:'strata',loaded:true,model:'deepseek-v4.1-flash'}:metrics};
+  },'http://127.0.0.1:8091');
+  const snapshot=await provider.read();
+  assert.equal(snapshot.available,true);assert.deepEqual(snapshot.metrics,metrics);
+  assert.equal(Object.hasOwn(snapshot.metrics.engine,'expert_cache_mib'),false);
+  assert.deepEqual(calls,['/health','/metrics'].map(endpoint=>({url:'http://127.0.0.1:8091'+endpoint,method:'GET'})));
 });
 test('custom local upstream remains GET-only and reports authorization failures', async () => {
   const calls = [];

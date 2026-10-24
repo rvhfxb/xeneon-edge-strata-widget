@@ -103,7 +103,19 @@
     } else if (live.state === "generating") setPill("generating", `Generating · ${fmt(live.tok_s, 1)} tok/s`);
     else setPill("idle", "Idle");
     if (live.queued > 0) setPill("queued", `${live.queued} queued`);
+    renderConversationCache(m.conversation_cache);
     renderMonitor(live, hw, st, eng, h, last, requests, m.totals, m.requests_kept);
+  }
+
+  function renderConversationCache(cache) {
+    $("conversation-cache").hidden = !cache;
+    if (!cache) return;
+    $("cache-reuse").textContent = cache.last_prompt != null
+      ? `${fmt(cache.last_reused || 0)} / ${fmt(cache.last_prompt)} tokens`
+      : "–";
+    $("cache-detail").textContent = cache.enabled
+      ? `${fmt(cache.parked)} / ${fmt(cache.slots)} parked · ${gb(cache.bytes)} / ${gb(cache.budget_mib == null ? null : cache.budget_mib * 1048576)} GB`
+      : "Last conversation retained";
   }
 
   function renderTotals(t) {
@@ -157,11 +169,11 @@
     const per = (f) => (hw.gpus || []).map((g) => `GPU ${g.index} ${f(g)}`).join(" · ");
     const multi = (hw.gpus || []).length > 1;
     setMetric("gpu", hw.gpu_util == null ? null : fmt(hw.gpu_util), "%",
-              multi ? per((g) => (g.util == null ? "–" : `${fmt(g.util)}%`)) : st.gpu_name || "");
+              multi ? per((g) => (g.util == null ? "–" : `${fmt(g.util)}%`)) : st.gpu_name || (st.gpu_note ? "not available" : ""));
     spark("sp-gpu", h.gpu_util, 100);
     setMetric("vram", hw.gpu_mem_used == null ? null : gb(hw.gpu_mem_used), hw.gpu_mem_total ? `/ ${gb(hw.gpu_mem_total, 0)} GB` : "GB",
               multi ? per((g) => (g.mem_used == null ? "–" : `${gb(g.mem_used)} GB`))
-                    : eng.expert_slots ? `${fmt(eng.expert_slots)} experts cached` : "");
+                    : eng.expert_slots != null ? `${fmt(eng.expert_slots)} experts cached` : (st.gpu_note ? "not available on Windows AMD yet" : ""));
     spark("sp-vram", h.gpu_mem_used, hw.gpu_mem_total);
     setMetric("temp", hw.gpu_temp == null ? null : fmt(hw.gpu_temp), "°C",
               multi ? per((g) => (g.temp == null ? "–" : `${fmt(g.temp)}°`)) : "");
@@ -194,9 +206,12 @@
     $("ctx-fill").style.opacity = 235.6 * frac >= 3 ? "1" : "0";         // a near-zero arc would draw just its round cap
     $("ctx-pct").textContent = `${Math.round(frac * 100)}%`;
     $("ctx-sub").textContent = ctx ? `${kfmt(used)} / ${ctxfmt(ctx)}` : "–";
-    const cacheBytes = (eng.expert_cache_mib || 0) * 1048576;
-    $("slots-text").textContent = eng.expert_slots ? `${fmt(eng.expert_slots)} · ${gb(cacheBytes)} GB` : "–";
-    $("slots-bar").style.width = hw.gpu_mem_total ? `${Math.min(100, (100 * cacheBytes) / hw.gpu_mem_total)}%` : "0%";
+    // DeepSeek reports slot counts without expert_cache_mib. Do not invent a 0 GB measurement.
+    const cacheBytes = eng.expert_cache_mib == null ? null : eng.expert_cache_mib * 1048576;
+    $("slots-text").textContent = eng.expert_slots != null
+      ? `${fmt(eng.expert_slots)}${cacheBytes == null ? "" : ` · ${gb(cacheBytes)} GB`}` : "–";
+    $("slots-progress").hidden = cacheBytes == null;
+    $("slots-bar").style.width = cacheBytes != null && hw.gpu_mem_total ? `${Math.min(100, (100 * cacheBytes) / hw.gpu_mem_total)}%` : "0%";
     $("ram-text").textContent = hw.ram_total ? `${gb(hw.ram_used)} / ${gb(hw.ram_total, 0)} GB` : "–";
     const ramPct = hw.ram_total ? (100 * hw.ram_used) / hw.ram_total : 0;
     $("ram-bar").style.width = `${ramPct}%`;
@@ -207,7 +222,7 @@
     // recent requests: as many of the last 12 as fit the card
     const body = $("req-body");
     if (!requests.length) {
-      body.innerHTML = `<tr><td colspan="8" class="muted">No requests yet</td></tr>`;
+      body.innerHTML = `<tr><td colspan="9" class="muted">No requests yet</td></tr>`;
     } else {
       const badge = {stop: ["", "Done"], length: ["", "Max tokens"], cancel: ["st-badge--queued", "Stopped"],
                      disconnect: ["st-badge--queued", "Closed"], error: ["st-badge--error", "Error"]};
@@ -217,8 +232,10 @@
         const proj = r.projection == null ? "" : `<span class="st-badge${r.projection ? " st-badge--reading" : ""}" title="experimental speed projection ${r.projection ? "on" : "off"}">${r.projection ? "ESP" : "stock"}</span>`;
         const hit = r.hit_rate == null ? "–" : `${(r.hit_rate * 100).toFixed(1)}%` +
           (r.pcie_share ? ` <span class="muted">+${(r.pcie_share * 100).toFixed(1)}% PCIe</span>` : "");
+        const fresh = r.prompt_tokens == null ? null : Math.max(0, r.prompt_tokens - (r.reused || 0));
+        const prefillRate = fresh > 0 && r.prompt_ms > 0 ? fresh / (r.prompt_ms / 1000) : null;
         return `<tr><td>${esc(t)}</td><td><span class="st-badge ${cls}">${esc(text)}</span>${proj}</td><td class="num">${fmt(r.prompt_tokens)}</td>
-          <td class="num">${fmt(r.reused)}</td><td class="num">${fmt(r.output_tokens)}</td><td class="num">${fmt(r.decode_tok_s, 1)}</td>
+          <td class="num">${fmt(r.reused)}</td><td class="num">${fmt(r.output_tokens)}</td><td class="num">${fmt(prefillRate)}</td><td class="num">${fmt(r.decode_tok_s, 1)}</td>
           <td class="num">${hit}</td><td class="num">${fmt(r.duration_s, 1)} s</td></tr>`;
       }).join("");
     }
@@ -232,9 +249,10 @@
   function offline(reason) {
     setPill("error", reason === "auth_required" ? "API key needed" : "Server not reachable");
     renderMonitor({}, {}, {}, {}, {}, null, [], null, 0);
+    renderConversationCache(null);
     $("state-label").textContent = reason === "auth_required" ? "Strata requires an API key" : "Strata is not reachable";
     $("state-detail").textContent = "retrying every 2 s";
-    $("req-body").innerHTML = `<tr><td colspan="8" class="muted">Connection unavailable</td></tr>`;
+    $("req-body").innerHTML = `<tr><td colspan="9" class="muted">Connection unavailable</td></tr>`;
     $("model").textContent = "–"; $("model").title = "";
     $("ms-disk").textContent = "";
   }

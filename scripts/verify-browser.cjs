@@ -5,6 +5,7 @@ const {pathToFileURL} = require('node:url');
 const root = path.resolve(__dirname, '..');
 const out = path.resolve(process.argv[2] || path.join(root, 'dist/browser-check'));
 const live = process.argv.includes('--live');
+const deepseek = process.argv.includes('--deepseek');
 const chrome = [process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)'], process.env.LOCALAPPDATA]
   .filter(Boolean).map(p => path.join(p, 'Google/Chrome/Application/chrome.exe')).find(p => fs.existsSync(p));
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -18,6 +19,14 @@ const fixture = {
     requests:[{time:1801720000,prompt_tokens:10000,reused:9900,prompt_ms:1000,output_tokens:100,decode_tok_s:75,duration_s:3,finish:'stop'}]
   }
 };
+if (deepseek) {
+  fixture.health.model='DeepSeek-V4.1-Flash-1017-IQ2_XXS';
+  fixture.metrics.engine={engine_kind:'ds4',max_context:65536,expert_slots:2167,context:65536,kv:'fp4',drafting:'off'};
+  fixture.metrics.conversation_cache={enabled:false,last_prompt:10000,last_reused:9900};
+  fixture.metrics.requests[0].projection=null;
+  fixture.metrics.requests[0].hit_rate=null;
+  fixture.metrics.requests=Array.from({length:12},(_,i)=>({...fixture.metrics.requests[0],time:1801720000-i*60}));
+}
 async function main() {
   assert.ok(chrome, 'Google Chrome is required'); fs.mkdirSync(out, {recursive:true});
   const profile = fs.mkdtempSync(path.join(os.tmpdir(),'strata-edge-check-'));
@@ -64,6 +73,18 @@ async function main() {
     if (!live) {
     assert.equal(await text('pill-text'),'Idle');
     assert.equal(await text('mv-prefill'),'100t/s');
+    assert.equal(await evaluate('document.querySelector("#req-body tr").cells[5].textContent'),'100');
+    if (deepseek) {
+      assert.equal(await text('slots-text'),'2,167');
+      assert.equal(await evaluate('document.getElementById("slots-progress").hidden'),true);
+      assert.equal(await text('cache-reuse'),'9,900 / 10,000 tokens');
+      assert.equal(await evaluate('document.getElementById("conversation-cache").hidden'),false);
+      assert.equal(await evaluate('document.querySelector("#req-body tr").cells[7].textContent'),'–');
+      report.checks.push({name:'DeepSeek missing cache size/hit rate and prompt reuse'});
+    } else {
+      assert.equal(await text('slots-text'),'6,671 · 19.5 GB');
+      assert.equal(await evaluate('document.getElementById("conversation-cache").hidden'),true);
+    }
     const graph=await evaluate('document.querySelector("#sp-prefill .line").getAttribute("d")');
     assert.ok(graph.split(/[ML]/).filter(Boolean).every(p=>p.endsWith(',30.00')));
     report.checks.push({name:'official idle Prefill numeric/graph behavior',prefill:await text('mv-prefill')});
@@ -80,21 +101,37 @@ async function main() {
     await evaluate('window.__snapshot.metrics.live={state:"generating",generated:200,max_tokens:512,tok_s:77,prefill_tok_s_mean:1800};window.__snapshot.metrics.requests[0].finish="error";window.__snapshot.health.model="<img src=x onerror=alert(1)>"');await delay(2100);
     assert.equal(await text('mv-speed'),'77.0t/s');assert.equal(await evaluate('document.getElementById("model").children.length'),0);
     report.checks.push({name:'generation and safe server text'});
+    await evaluate('window.__snapshot.health.model='+JSON.stringify(deepseek?'DeepSeek-V4.1-Flash-1017-IQ2_XXS':'Qwen3.8-Flash-Next-UD-Q4_K_XL'));
+    await delay(2100);
     }
     for (const theme of ['dark','light']) for(const [width,height] of [[2560,720],[1280,360],[736,207]]) {
       await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       await evaluate(`window.widgetTheme=${JSON.stringify(theme)};window.icueEvents.onDataUpdated()`); await delay(600);
       const expectedScale=Math.min(width/2048,height/576);
       assert.equal(await evaluate('document.getElementById("scene").style.transform'),`scale(${expectedScale})`);
-      const layout=JSON.parse(await evaluate('document.body.dataset.check'));assert.deepEqual(layout.bad,[]);
+      const layout=JSON.parse(await evaluate('document.body.dataset.check'));
+      if (layout.bad.length) {
+        const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+        fs.writeFileSync(path.join(out,'layout-failure.png'),Buffer.from(shot.data,'base64'));
+      }
+      assert.deepEqual(layout.bad,[],JSON.stringify(layout));
       report.checks.push({name:`layout ${width}x${height} ${theme}`,layout});
       const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(out,`${width}x${height}-${theme}.png`),Buffer.from(shot.data,'base64'));
     }
     if (!live) {
+    if (deepseek) {
+      await evaluate('window.__snapshot.metrics.conversation_cache={enabled:true,last_prompt:10000,last_reused:9900,parked:2,slots:4,bytes:1610612736,budget_mib:8192};window.__snapshot.metrics.engine.expert_cache_mib=0;window.__snapshot.metrics.engine.expert_slots=0');await delay(2100);
+      assert.equal(await text('cache-detail'),'2 / 4 parked · 1.5 / 8.0 GB');
+      assert.equal(await text('slots-text'),'0 · 0.0 GB');
+      assert.equal(await evaluate('document.getElementById("slots-progress").hidden'),false);
+      assert.deepEqual(JSON.parse(await evaluate('document.body.dataset.check')).bad,[]);
+      report.checks.push({name:'parked conversation memory and real zero expert cache'});
+    }
     await evaluate('window.__snapshot.metrics.live={state:"idle",queued:0};window.__snapshot.health.loaded=false'); await delay(2100);
     assert.equal(await text('pill-text'),'Model not loaded'); report.checks.push({name:'unloaded state'});
     await evaluate('window.__stale=true'); await delay(2100);
     assert.equal(await text('pill-text'),'Server not reachable'); assert.equal(await text('mv-speed'),'–');report.checks.push({name:'stale data clears speed'});
+    assert.equal(await evaluate('document.getElementById("conversation-cache").hidden'),true);
     await evaluate('window.__stale=false;window.__snapshot.available=false;window.__snapshot.error="auth_required"');await delay(2100);
     assert.equal(await text('pill-text'),'API key needed');report.checks.push({name:'authentication failure'});
     await evaluate('window.__fail=true');await delay(2100);

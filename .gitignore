@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.log
 helper.pid
+helper.local.json
 *.icuewidget
 artifacts/
 .env

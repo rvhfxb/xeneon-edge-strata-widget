@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const metricsW = document.querySelector(".metrics")?.offsetWidth;
       const reqW = document.querySelector(".req-card")?.offsetWidth;
       const cards = [...document.querySelectorAll(".metric-card")].map(c => c.offsetWidth);
-      document.body.dataset.check = JSON.stringify({rows: $("req-body").rows.length, pill: $("pill-text").textContent, bad, widths: { colLeft, metricsW, reqW, cards: cards.slice(0, 4) }});
+      const wrap = document.querySelector(".table-wrap");
+      const table = {width:wrap.clientWidth,scrollWidth:wrap.scrollWidth,height:wrap.clientHeight,scrollHeight:wrap.scrollHeight};
+      document.body.dataset.check = JSON.stringify({rows: $("req-body").rows.length, pill: $("pill-text").textContent, bad, table, widths: { colLeft, metricsW, reqW, cards: cards.slice(0, 4) }});
     }, 500);
 });

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 — 2026-10-25
+
+- Support Strata v0.2.4 monitoring APIs (Terminal 0.2.4.2), including DeepSeek, while retaining Qwen/older-server compatibility.
+- Match the latest Monitor's per-request Prefill / Decode rates and show a compact prompt-reuse / conversation-cache summary.
+- Display DeepSeek expert counts without claiming 0 GB when the engine does not report cache capacity; keep missing hit rates unavailable.
+- Allow an untracked helper.local.json to override the shared upstream configuration without entering release ZIPs.
+- Pin official CSS to v0.2.4 commit 96ca4383c7b05a8a3e6064c65d9e9977d4b3bb59; retain official idle and missing-sample graph behavior.
+- Expand regression coverage for DeepSeek telemetry, conversation cache, and real zero versus missing cache capacity. Update English/Japanese documentation and screenshots.
+
 ## 0.1.5 — 2026-10-05
 
 - Make Stop/Uninstall safe for Ready/Disabled tasks, including a task finishing during Stop.

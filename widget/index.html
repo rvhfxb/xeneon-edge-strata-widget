@@ -89,12 +89,16 @@
           </div>
           <div class="ctx-bars">
             <div class="bar-row"><span>Experts in VRAM</span><span class="muted" id="slots-text">&ndash;</span></div>
-            <div class="st-progress"><div class="st-progress__bar" id="slots-bar" style="width:0%"></div></div>
+            <div class="st-progress" id="slots-progress"><div class="st-progress__bar" id="slots-bar" style="width:0%"></div></div>
             <div class="bar-row"><span>System RAM</span><span class="muted" id="ram-text">&ndash;</span></div>
             <div class="st-progress" id="ram-progress"><div class="st-progress__bar" id="ram-bar" style="width:0%"></div></div>
             <div class="bar-row"><span>GPU temperature</span><span class="muted" id="temp-text">&ndash;</span></div>
             <div class="st-progress" data-tone="warn"><div class="st-progress__bar" id="temp-bar" style="width:0%"></div></div>
           </div>
+        </div>
+        <div id="conversation-cache" hidden>
+          <div class="bar-row"><span>Prompt reuse</span><span class="muted" id="cache-reuse">&ndash;</span></div>
+          <p class="muted cache-detail" id="cache-detail"></p>
         </div>
       </div>
 
@@ -103,8 +107,8 @@
         <div class="table-wrap">
           <table class="st-table">
             <thead><tr><th>Time</th><th>Status</th><th class="num">Prompt</th><th class="num">Reused</th><th class="num">Output</th>
-              <th class="num">Tok/s</th><th class="num">VRAM hit rate</th><th class="num">Duration</th></tr></thead>
-            <tbody id="req-body"><tr><td colspan="8" class="muted">No requests yet</td></tr></tbody>
+              <th class="num">Prefill t/s</th><th class="num">Decode t/s</th><th class="num">VRAM hit</th><th class="num">Duration</th></tr></thead>
+            <tbody id="req-body"><tr><td colspan="9" class="muted">No requests yet</td></tr></tbody>
           </table>
         </div>
         <p class="muted req-totals" id="req-totals"></p>

@@ -15,7 +15,10 @@ function validateUpstream(value) {
   if (url.hostname === 'localhost') url.hostname = '127.0.0.1';
   return url.origin;
 }
-function readConfig(configPath = path.resolve(__dirname, '../helper.config.json')) {
+function readConfig(configPath, localPath = path.resolve(__dirname, '../helper.local.json')) {
+  if (!configPath) {
+    configPath = fs.existsSync(localPath) ? localPath : path.resolve(__dirname, '../helper.config.json');
+  }
   if (!fs.existsSync(configPath)) return DEFAULT_UPSTREAM;
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8').replace(/^\uFEFF/, ''));
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('helper.config.json must contain a JSON object.');

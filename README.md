@@ -2,104 +2,96 @@
 
 [日本語](README.md) | [English](README.en.md)
 
-Strata v0.2.4 の公式 Web UI「Monitor」を XENEON EDGE（2560×720）に合わせたコミュニティ製 iCUE ウィジェット。作者: rvhfxb。Strata / CORSAIR の公式製品ではありません。
+Strata Web UIの「Monitor」をXENEON EDGE（2560×720）で表示するiCUEウィジェット。モデルの稼働状態、生成速度、GPU・メモリ使用量、リクエスト履歴を確認できます。
 
-[配布ファイルをダウンロード](https://github.com/rvhfxb/xeneon-edge-strata-widget/releases/tag/v0.2.0)。初回はヘルパー同梱 ZIP、既存ヘルパーがある場合は `.icuewidget` を使用してください。GitHub の「Source code」ZIP は開発用ソースです。
+[ダウンロード](https://github.com/rvhfxb/xeneon-edge-strata-widget/releases/tag/v0.2.0)
+
+初回はヘルパー同梱のZIPを使用してください。対応するヘルパーがすでに動いている場合は、`.icuewidget`だけで更新できます。
 
 ## スクリーンショット
 
-2560×720のブラウザープレビュー（v0.2.0、実データ）。モデル表示名は公開用に、ダウンロード済みGGUFのファイル名からシャード番号と拡張子を省いた `DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XXS` に置き換えています。XENEON EDGE本体の写真ではありません。アイドル時の速度は直近リクエストの値で、グラフは公式と同じ60秒の履歴です。
+2560×720のブラウザープレビュー。
 
 **ダーク**
 
-![Strata Edgeのダークテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-dark-preview.png)
+![Strata Edgeのダークテーマ](docs/images/strata-edge-dark-preview.png)
 
 **ライト**
 
-![Strata Edgeのライトテーマ：モデル状態、速度、GPU・メモリ、コンテキスト、直近リクエスト](docs/images/strata-edge-light-preview.png)
+![Strata Edgeのライトテーマ](docs/images/strata-edge-light-preview.png)
 
 ## 必要なもの
 
-- Windows 11、XENEON EDGE、iCUE 5.51 以降。
-- Node.js 22 以降が PATH に登録されていること。Node.js は ZIP に含まれません。
-- 同じ PC 上で起動した Strata。対応確認は v0.2.4系（Terminal 0.2.4.2、DeepSeek / Qwen）、監視 API は `/health` と `/metrics`。旧v0.1.39形式も回帰検証しています。初期接続先は `http://127.0.0.1:8086`。
-- 監視 API が API キーを要求しない構成。本版は認証付き接続に対応していません。
+- Windows 11、XENEON EDGE、iCUE 5.51以降
+- Node.js 22以降（PATHに登録）
+- 同じPC上で起動しているStrata（v0.2.4系のDeepSeek / Qwenに対応）
+- APIキーなしで利用できる`/health`と`/metrics`
 
-## 初めて導入する
+## 導入
 
-1. `strata-edge-0.2.0.zip` を任意の**書き込み可能な固定フォルダー**へ展開。ZIP 内から直接起動しないでください。
-2. Strata のポートが 8086 以外なら `helper.config.json` の `strataUrl` を変更。例: `http://127.0.0.1:8080`。DeepSeekも起動済みのサーバーのポートを指定します。単一の接続先を指定します。
-3. `Install-Helper.cmd` を実行。現在ユーザーのログオン時に非表示で起動するタスク `Strata Edge Helper` を登録し、今すぐ起動します。
-4. `http://127.0.0.1:5199/` をブラウザーで開き、モデル名・状態が表示されることを確認。
-5. iCUE の XENEON EDGE ウィジェット追加から同梱の `strata-edge-0.2.0.icuewidget` を取り込み、画面全体へ配置。
+1. `strata-edge-0.2.0.zip`を、書き込み可能なフォルダーへ展開します。
+2. `helper.config.json`の`strataUrl`を、Strataの起動先に合わせます。初期値は`http://127.0.0.1:8086`です。
+3. `Install-Helper.cmd`を実行します。ヘルパーが起動し、次回以降はWindowsへのログオン時に自動起動します。
+4. ブラウザーで`http://127.0.0.1:5199/`を開き、モデル名と状態が表示されることを確認します。
+5. iCUEで同梱の`strata-edge-0.2.0.icuewidget`を取り込み、XENEON EDGEの画面全体に配置します。
 
-CMD は PowerShell の実行ポリシーをそのプロセスだけ Bypass にして起動します。PC 全体のポリシーは変更しません。組織のポリシーで実行が禁止されている場合は、その管理方針に従ってください。
+接続先の設定例：
 
-ウィジェットだけを取り込んでも監視にはヘルパーが必要です。初回の配布には ZIP を使ってください。インストール後は本フォルダーと Node.js の場所を変えないでください。
+```json
+{
+  "strataUrl": "http://127.0.0.1:8080"
+}
+```
 
-ソース更新で個人設定を上書きしたくない場合は、同じフォルダーに `helper.local.json` を作成できます。`helper.config.json` と同じ形式で、ファイルが存在するとこちらを優先します。例: `{"strataUrl":"http://127.0.0.1:8091"}`。Git管理・配布ZIPには含めません。変更後はヘルパーを Stop → Start してください。
+接続先はローカルのHTTPサーバーに限ります。`/v1`などのAPIパスは付けず、Strataのポートまでを指定してください。
 
-## 既存の Strata ヘルパーがある場合
+更新時に設定を保ちたい場合は、同じ形式の`helper.local.json`を作成してください。こちらの設定が優先されます。設定変更後はヘルパーを停止し、再起動してください。
 
-旧 Strata Monitor の `XENEON EDGE Strata Helper` が `127.0.0.1:5199/api/snapshot` を提供していれば共用できます。**ヘルパーを追加登録せず、icuewidget だけ取り込めます。** 共用時、5199 のブラウザープレビューは既存ヘルパー側の画面です。
+インストール後は、展開したフォルダーとNode.jsの場所を変えずに使用してください。
 
-新版ヘルパーへ移行する場合は、既存のインストールフォルダーで `Stop-Widget.ps1` を実行し、`Disable-ScheduledTask -TaskName 'XENEON EDGE Strata Helper'` で旧タスクを無効にしてから新版を導入します。旧ファイルは保管します。両方を同時起動すると5199が競合します。新インストーラーは既存タスクや別ヘルパーを自動停止しません。
+## 起動・停止・更新
 
-## 表示仕様
+| ファイル | 操作 |
+| --- | --- |
+| `Start-Helper.cmd` | ヘルパーを起動。無効化した自動起動も再有効化します。 |
+| `Stop-Helper.cmd` | ヘルパーを停止。自動起動の設定は維持します。 |
+| `Uninstall-Helper.cmd` | ヘルパーを停止し、自動起動を解除します。 |
 
-- 公式の Outfit・色・カード・アイコン・ラベル・計算式を使用。CSSはStrata v0.2.4の固定commitとハッシュで照合し、tokens.cssのフォントURL2箇所のみ同梱先へ変更しています。2048×576 CSS px を全画面時に1.25倍し、小さい領域では等比縮小。
-- 左に Model state と均等幅4列×2行のメトリック、右に Context fill と Recent requests（領域に収まる直近の要求、最大12件）。
-- Decode / Prefill、GPU load / VRAM / temp / power / PCIe、CPU / Disk read、System RAM / Experts、コンテキスト・リクエスト・累計を表示。サーバー切り替えはありません。
-- **速度の数値とグラフは公式 v0.2.4 と同じ仕様。** 処理中は現在値、アイドル時の数値は最後のリクエストの平均。グラフは過去60秒のサンプルで、Prefill を処理していない時間は0です。数値が残っていてもグラフは0になる場合があります。欠損サンプルを0として描く処理も公式に準拠。
-- 初期ダーク。ヘッダーボタンの変更を保存。iCUE 設定の Theme を変更すると反映し、設定が変わらない更新通知ではヘッダーの選択を戻しません。
-- 表示は2秒ごとに取得。ヘルパーは `/health` と `/metrics` への GET のみを使い、ロード・アンロード・推論要求は送りません。通信失敗・10秒以上古い値では速度などを未取得表示にします。
-- Context fill は入力＋出力の占有目安で、KV 実使用量ではありません。メモリは公式同様の1024基準。Disk read は Strata 側に psutil がないと未取得になります。
-- 最新Monitorに合わせ、Recent requestsにPrefill / Decode速度を表示し、会話キャッシュの直近Prompt再利用数・退避件数・メモリをコンパクトに表示します。キャッシュ情報がない旧サーバーでは欄を隠します。
-- DeepSeekのようにExpert数のみが報告される場合は、その数だけを表示します。容量を推測して0 GBにせず、容量バーは非表示です。VRAM hit rate等の未提供値も未取得表示にします。
+更新するときは、Stop → 新版ファイルを配置 → Install → 新しい`.icuewidget`を取り込み、の順に進めてください。別のフォルダーへ移す場合は、元のフォルダーでUninstallしてから移動先でInstallしてください。ウィジェットの削除はiCUEで行います。
 
-## 起動・停止・更新・削除
+自動起動を一時的に無効にする場合は、次のコマンドを実行してからStopしてください。Startで元に戻せます。
 
-- `Start-Helper.cmd`: 手動起動。本タスクが無効なら再有効化。Runningでも応答がなくポートが空いていれば再起動します。別のプロセスがポートを使用中なら停止しません。
-- `Stop-Helper.cmd`: 今回の実行を停止。停止済み・Disabledでも繰り返し実行できます。次回ログオンでは、タスクが有効なら起動。
-- `Uninstall-Helper.cmd`: 本フォルダーに対応するタスクを停止・解除。ウィジェットは iCUE 側で削除。
-- 自動起動を一時無効化: `Disable-ScheduledTask -TaskName 'Strata Edge Helper'` の後に Stop。復帰は Start。
-- 接続先変更後: Stop → Start。設定はヘルパー起動時に読み直します。
-- 同じ場所への更新: Stop → 新版ファイルを配置 → Install → 新しい icuewidget を取り込み。別フォルダーへ移す場合は旧フォルダーで Uninstall 後、新フォルダーで Install。
-- 復旧: 新版を停止・解除して保管した旧版を元の場所から起動。旧共用ヘルパーへ戻すなら `Enable-ScheduledTask -TaskName 'XENEON EDGE Strata Helper'` と旧 `Start-Widget.ps1`。
+```powershell
+Disable-ScheduledTask -TaskName 'Strata Edge Helper'
+```
 
-ログの自動ローテーションはありません。起動・エラーのみを記録し、リクエストごとの計測ログは追記しません。月1回、または `helper-output.log` / `helper-error.log` が1 MiBを超えたら確認し、Stopで停止してからログを退避・削除し、Startで再開してください。
+既存のヘルパーが`127.0.0.1:5199/api/snapshot`を提供していれば共用できます。置き換える場合は、先に既存ヘルパーの停止と自動起動の解除を行ってください。
 
-Strata 自体は上記操作では停止しません。タスクは現在ユーザー / Interactive / Limited、ログオン時起動、異常終了時は1分間隔3回再試行です。
+## 表示について
+
+- Strata Web UIに合わせた配色・フォント・カードを使用し、ダーク／ライトを切り替えられます。
+- 速度、GPU負荷・VRAM・温度・電力・PCIe、CPU・RAM・ディスク読み取り、コンテキスト、会話キャッシュ、リクエスト履歴を表示します。
+- 速度の数値とグラフは公式Monitorと同じ仕様です。処理中は現在値、アイドル時の数値は直近リクエストの平均を表示します。グラフは過去60秒の履歴なので、数値が残っていてもPrefillのグラフは0になることがあります。
+- 2秒ごとに更新します。通信に失敗した場合や10秒以上古いデータは未取得表示になります。Strataが提供しない項目も「–」で表示します。
+- Context fillは入力＋出力トークンの占有目安です。Disk readの取得にはStrata側のpsutilが必要です。
 
 ## 困ったとき
 
-- `Server not reachable`: Strata の起動状態、`helper.config.json`、`http://127.0.0.1:5199/api/snapshot` を確認。
-- `API key needed`: 監視 API が認証を要求しています。本版の対象外。
-- 5199 競合: 既存ヘルパーを共用するか、提供元の停止手順を使用。
-- 起動失敗: `helper-error.log` / `helper-output.log` と `node --version`（22以上）を確認。
-- `Model not loaded`: ヘルパーとの通信は成立していますが、Strata 側にモデルがありません。
+| 表示・症状 | 確認すること |
+| --- | --- |
+| `Server not reachable` | Strataが起動しているか、接続先のURLとポートが正しいか確認してください。`helper.local.json`があれば、そちらが優先されます。 |
+| `API key needed` | 認証付き接続には対応していません。監視APIをAPIキーなしで利用できる構成が必要です。 |
+| `Model not loaded` | Strataでモデルをロードしてください。 |
+| ヘルパーが起動しない | `node --version`と`helper-error.log`、`helper-output.log`を確認してください。 |
+| ポート5199が使用中 | 既存ヘルパーを共用するか、停止してから起動してください。 |
 
-接続先の `strataUrl` が欠落・nullなら初期値8086を使用します。`localhost` は127.0.0.1へ正規化します。IPv6の接続先は `http://[::1]:ポート` を指定してください。
+ログは自動でローテーションされません。月1回、または1 MiBを超えたら確認し、不要なログはヘルパーを停止してから退避・削除してください。
 
-StrataのTerminal/アプリとエンジンのバージョンは別です。v0.2.4系のTerminal表示は0.2.4.2、Desktopは0.2.3です。本ウィジェットは起動済みサーバーの監視APIへ接続し、Strataやエンジンの更新・起動は行いません。
+v0.2.0はブラウザーでの表示を確認しています。実iCUEへの取り込み・タッチ操作・再ログオン後の自動起動は未確認です。
 
-ヘルパーは 127.0.0.1:5199 のみで待ち受けます。接続先設定も localhost / 127.0.0.1 / ::1 の HTTP origin に限定。URL に API パスや認証情報を含めず、設定ファイルに API キーや秘密値を書かないでください。
+## 開発
 
-## ライセンス
-
-本プロジェクト: MIT（`LICENSE`）。Strata 由来コード・CSS・アイコン: MIT（`widget/resources/STRATA-LICENSE.txt`）。Outfit: SIL OFL 1.1（`widget/resources/fonts/OFL.txt`）。詳細は `THIRD-PARTY-NOTICES.md`。
-
-ZIP 内の `SHA256SUMS.txt` は同梱ファイルのハッシュ一覧。ZIP と icuewidget 自体は別添 `strata-edge-0.2.0-SHA256SUMS.txt` で確認できます。
-
-## 検証と制限 — 2026-10-25
-
-Node ヘルパー HTTP テスト、PowerShell 構文・タスク操作の模擬検証、Chrome file:// の旧Qwen形式 / 最新DeepSeek形式・状態・テーマ回帰テスト、実DeepSeekサーバーからの表示、2560×720 / 1280×360 / 736×207 の表示、公式 CLI 0.4.47 の validate / package、ZIP 内容・ハッシュ一致を検証。
-
-**0.2.0 の実 iCUE 取り込み、実機タッチ、Windows 再ログオンでの自動起動は未検証。** 既存 helper / Strata は配布ファイルの作成だけでは更新されません。
-
-通常はResizeObserverとresizeイベントで画面に合わせます。ResizeObserver非対応の埋め込みブラウザーのみ、以前iCUEで有効だった1秒間隔の再計算を残しています。
-
-## 開発（ソースフォルダー）
+Node.js 22以降とChromeを使用します。
 
 ```powershell
 npm ci
@@ -108,9 +100,15 @@ node scripts/test-upstream.cjs --upstream
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-helper.ps1
 npm run validate
 npm run verify
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1 -OutDir C:\temp\strata-edge-check
 npm run package
 ```
 
-`verify-browser.cjs` は Chrome と Node.js 22 以上を使い模擬データで検証。レイアウト診断はDevTools経由で開発スクリプトを注入し、出荷版のapp.jsには含めません。`check.ps1` は起動済みヘルパーの実データを使用。開発スクリプトと npm 依存は配布 ZIP に含めません。
+実行中のヘルパーを使った表示確認：
 
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1 -OutDir C:\temp\strata-edge-check
+```
+
+## ライセンス
+
+[MIT](LICENSE)。Strata由来のコード・CSS・アイコンはMIT、OutfitはSIL OFL 1.1です。詳細は[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)を参照してください。
